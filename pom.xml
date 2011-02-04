@@ -4,7 +4,7 @@
 
   <groupId>org.hedstrom.maven.plugin</groupId>
   <artifactId>maven-diff-plugin</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
   <packaging>maven-plugin</packaging>
 
   <name>maven-diff-plugin - Maven Plugin</name>
