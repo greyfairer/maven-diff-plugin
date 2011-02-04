@@ -50,20 +50,20 @@ public class DiffMojo extends AbstractMojo {
     protected MavenProject project;
 	
 	/**
-	 * URI to original file.
+	 * URIs to original files
 	 * 
-	 * @parameter expression="${diff.originalFile}"
+	 * @parameter
 	 * @required
 	 */
-	private URI originalFile;
+	private URI[] originalFiles;
 	
 	/**
-	 * URI to revised file.
+	 * URIs to revised files.
 	 * 
-	 * @parameter expression="${diff.revisedFile}"
+	 * @parameter
 	 * @required
 	 */
-	private URI revisedFile;
+	private URI[] revisedFiles;
 	
 	/**
 	 * Set to true if the build should be aborted on diff found.
@@ -94,25 +94,38 @@ public class DiffMojo extends AbstractMojo {
 	private Log log;
 	
 	@Override
-	public void execute() throws MojoExecutionException {
+	public void execute() throws MojoExecutionException, MojoFailureException {
 		log = getLog();
 		try {
-			List<String> original = toLines(originalFile);
-			List<String> revised = toLines(revisedFile);
-
-			Patch patch = DiffUtils.diff(original, revised);
-			
-			if(!patch.getDeltas().isEmpty()) {
-				for(Delta delta : patch.getDeltas()) {
-					log.warn(String.format("diff: \n\t[original] -> %s\n\t[revised] -> %s", delta.getOriginal().toString(), delta.getRevised().toString()));
-				}
-				if(abortBuildOnDiff) {
-					throw new MojoFailureException("diffs found! See above");
-				}
+			if(originalFiles.length != revisedFiles.length) {
+				log.error(String.format("Original and revised files must match [originals: %s] [revised: %s]", originalFiles.length, revisedFiles.length));
 			} else {
-				log.info(String.format("The resources: [%s] and [%s] are identical", originalFile.toString(), revisedFile.toString()));
+				boolean diffFound = false;
+				for(int i = 0; i < originalFiles.length; ++i) {
+					List<String> original = toLines(originalFiles[i]);
+					List<String> revised = toLines(revisedFiles[i]);
+
+					Patch patch = DiffUtils.diff(original, revised);
+					
+					if(!patch.getDeltas().isEmpty()) {
+						for(Delta delta : patch.getDeltas()) {
+							log.warn(String.format("diff: \n\t[original] -> %s\n\t[revised] -> %s", delta.getOriginal().toString(), delta.getRevised().toString()));
+						}
+						diffFound = true;
+					} else {
+						log.info(String.format("The resources: [%s] and [%s] are identical", originalFiles[i].toString(), revisedFiles[i].toString()));
+					}
+				}
+				if(diffFound) {
+					if(abortBuildOnDiff) {
+						throw new MojoFailureException("diffs found! See above");
+					}
+				}
 			}
 		} catch (Exception e) {
+			if(e instanceof MojoFailureException) {
+				throw (MojoFailureException) e;
+			}
 			log.error("ERRORS comparing files.", e);
 		}
 	}

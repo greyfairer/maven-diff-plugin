@@ -1,0 +1,15 @@
+<project>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.hedstrom.maven.plugin</groupId>
+				<artifactId>maven-diff-plugin</artifactId>
+				<configuration>
+					<originalFile>original.txt</originalFile>
+					<revisedFile>revised.txt</revisedFile>
+					<abortBuildOnDiff>true</abortBuildOnDiff>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
