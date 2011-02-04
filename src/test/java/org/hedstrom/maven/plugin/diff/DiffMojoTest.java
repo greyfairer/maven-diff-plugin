@@ -8,6 +8,7 @@ public class DiffMojoTest {
 
 	@Test
 	public void test() {
+		System.out.println("Hello");
 		Assert.assertTrue(true);
 	}
 }
