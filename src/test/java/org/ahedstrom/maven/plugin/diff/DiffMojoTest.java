@@ -1,4 +1,4 @@
-package org.hedstrom.maven.plugin.diff;
+package org.ahedstrom.maven.plugin.diff;
 
 import junit.framework.Assert;
 

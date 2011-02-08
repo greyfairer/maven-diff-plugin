@@ -1,4 +1,4 @@
-package org.hedstrom.maven.plugin.diff;
+package org.ahedstrom.maven.plugin.diff;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
