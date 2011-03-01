@@ -90,6 +90,17 @@ public class DiffMojo extends AbstractMojo {
 	 */
 	private int connectTimeout;
 	
+	/**
+	 * Sets the read timeout to a specified timeout, in milliseconds. A non-zero 
+	 * value specifies the timeout when reading from Input stream when a 
+	 * connection is established to a resource. If the timeout expires before 
+	 * there is data available for read, a java.net.SocketTimeoutException is 
+	 * raised. A timeout of zero is interpreted as an infinite timeout.
+	 * 
+	 * @parameter expression="${diff.readTimeout}" default-value=10000
+	 */
+	private int readTimeout;
+	
 
 	private Log log;
 	
@@ -174,6 +185,7 @@ public class DiffMojo extends AbstractMojo {
 		} else if ("http".equals(uri.getScheme()) || "https".equals(uri.getScheme())) {
 			URLConnection conn = uri.toURL().openConnection();
 			conn.setConnectTimeout(connectTimeout);
+			conn.setReadTimeout(readTimeout);
 			in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		} else {
 			throw new IllegalArgumentException(String.format("unsupported uri: %s", uri.toString()));
