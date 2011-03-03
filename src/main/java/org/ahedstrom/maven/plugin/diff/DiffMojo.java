@@ -101,6 +101,12 @@ public class DiffMojo extends AbstractMojo {
 	 */
 	private int readTimeout;
 	
+	/**
+	 * Set to true if the build should should skip the diff
+	 * 
+	 * @parameter expression="${diff.skipDiff}" default-value=false
+	 */
+	private boolean skipDiff;
 
 	private Log log;
 	
@@ -111,26 +117,30 @@ public class DiffMojo extends AbstractMojo {
 			if(originalFiles.length != revisedFiles.length) {
 				log.error(String.format("Original and revised files must match [originals: %s] [revised: %s]", originalFiles.length, revisedFiles.length));
 			} else {
-				boolean diffFound = false;
-				for(int i = 0; i < originalFiles.length; ++i) {
-					List<String> original = toLines(originalFiles[i]);
-					List<String> revised = toLines(revisedFiles[i]);
+				if(!skipDiff) {
+					boolean diffFound = false;
+					for(int i = 0; i < originalFiles.length; ++i) {
+						List<String> original = toLines(originalFiles[i]);
+						List<String> revised = toLines(revisedFiles[i]);
 
-					Patch patch = DiffUtils.diff(original, revised);
-					
-					if(!patch.getDeltas().isEmpty()) {
-						for(Delta delta : patch.getDeltas()) {
-							log.warn(String.format("diff: \n\t[original] -> %s\n\t[revised] -> %s", delta.getOriginal().toString(), delta.getRevised().toString()));
+						Patch patch = DiffUtils.diff(original, revised);
+						
+						if(!patch.getDeltas().isEmpty()) {
+							for(Delta delta : patch.getDeltas()) {
+								log.warn(String.format("diff: \n\t[original] -> %s\n\t[revised] -> %s", delta.getOriginal().toString(), delta.getRevised().toString()));
+							}
+							diffFound = true;
+						} else {
+							log.info(String.format("The resources: [%s] and [%s] are identical", originalFiles[i].toString(), revisedFiles[i].toString()));
 						}
-						diffFound = true;
-					} else {
-						log.info(String.format("The resources: [%s] and [%s] are identical", originalFiles[i].toString(), revisedFiles[i].toString()));
 					}
-				}
-				if(diffFound) {
-					if(abortBuildOnDiff) {
-						throw new MojoFailureException("diffs found! See above");
+					if(diffFound) {
+						if(abortBuildOnDiff) {
+							throw new MojoFailureException("diffs found! See above");
+						}
 					}
+				} else {
+					log.info(String.format("Skipping diff because skipDiff is set to %s", skipDiff));
 				}
 			}
 		} catch (Exception e) {
