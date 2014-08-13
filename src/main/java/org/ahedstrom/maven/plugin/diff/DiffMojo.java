@@ -135,10 +135,11 @@ public class DiffMojo extends AbstractMojo {
                         Patch<String> patch = DiffUtils.diff(original, revised);
 
                         if (!patch.getDeltas().isEmpty()) {
+                            log.warn(String.format("The resources [%s] and [%s] are different:", file, revisedFile));
                             for (Delta<String> delta : patch.getDeltas()) {
                                 log.warn(
                                         String.format(
-                                                "diff: \n\t[original] -> %s\n\t[revised] -> %s", delta.getOriginal().toString(),
+                                                "\t[original] -> %s\n\t[revised]  -> %s", delta.getOriginal().toString(),
                                                 delta.getRevised().toString()
                                         )
                                 );
@@ -189,13 +190,13 @@ public class DiffMojo extends AbstractMojo {
         return lines;
     }
 
-    private BufferedReader createReader(File file) throws IOException {
+    private BufferedReader createReader(File file) throws IOException, MojoFailureException {
         log.debug(file.toString());
 
         if (file.exists()) {
             return new BufferedReader(new FileReader(file));
         } else {
-            throw new IOException(String.format("%s doesn't exist", file.getAbsolutePath()));
+            throw new MojoFailureException(String.format("%s doesn't exist", file.getAbsolutePath()));
         }
     }
 
